@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div style="background-color: navy; color: white;">
+    <title>Merge Sort Visualizer</title>
+    </div>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 30px;
+        }
+        .bar-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            height: 400px;
+            align-items: flex-end;
+        }
+        .bar {
+            width: 30px;
+            margin: 0 5px;
+            background-color: #ffd000;
+            transition: height 0.3s ease, background-color 0.3s ease;
+        }
+        .active {
+            background-color: purple;
+        }
+        .merged {
+            background-color: #b70000;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        button {
+            background-color: #000;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(to right, #000080, #87CEEB);
+background-size: cover;
+background-position: center;
+">
+    <div style="background-color: navy; color: white; border-radius: 10px; padding: 20px;">
+    <h1>Merge Sort Algorithm Visualizer</h1>
+    </div>
+
+    <div class="bar-container" id="bar-container"></div>
+
+    <div class="buttons">
+        <label style="color: white;"     for="speed">Sort Speed: </label>
+        <select id="speed">
+            <option value="2000">0.25x</option>
+            <option value="1750">0.5x</option>
+            <option value="1500">0.75x</option>
+            <option value="1250">1x</option>
+            <option value="1000">1.25x</option>
+            <option value="750">1.5x</option>
+            <option value="500">1.75x</option>
+            <option value="250">2x</option>
+        </select>
+        <br><br>
+        <button id="startBtn">Start Sorting</button>
+        <button id="stopBtn">Stop Sorting</button>
+    </div>
+
+    <script>
+        const numBars = 10;
+        const barContainer = document.getElementById('bar-container');
+        const bars = [];
+        let isSorting = false;
+        let currentSpeed = 500;
+
+        // Generate bars with random heights
+        function generateBars() {
+            barContainer.innerHTML = ''; 
+            for (let i = 0; i < numBars; i++) {
+                const barHeight = Math.floor(Math.random() * 300) + 50; 
+                const bar = document.createElement('div');
+                bar.style.height = barHeight + 'px';
+                bar.classList.add('bar');
+                barContainer.appendChild(bar);
+                bars.push(bar);
+            }
+        }
+
+        // Merge Sort Algorithm
+        async function mergeSort(start, end) {
+            if (start >= end) return;
+
+            const middle = Math.floor((start + end) / 2);
+            
+            // Divide: Sort the two halves
+            await mergeSort(start, middle);
+            await mergeSort(middle + 1, end);
+            
+            // Merge
+            await merge(start, middle, end);
+        }
+
+        // Merge function: Merging two sorted subarrays
+        async function merge(start, middle, end) {
+            let left = [], right = [];
+            
+            // Fill the left and right arrays with the values
+            for (let i = start; i <= middle; i++) {
+                left.push(parseInt(bars[i].style.height));
+            }
+            for (let i = middle + 1; i <= end; i++) {
+                right.push(parseInt(bars[i].style.height));
+            }
+
+            let i = 0, j = 0, k = start;
+
+            while (i < left.length && j < right.length) {
+                bars[k].classList.add('active'); // Highlight the bars being compared
+                bars[k + 1] && bars[k + 1].classList.add('active');
+                await new Promise(resolve => setTimeout(resolve, currentSpeed));
+
+                if (left[i] <= right[j]) {
+                    bars[k].style.height = left[i] + 'px';
+                    i++;
+                } else {
+                    bars[k].style.height = right[j] + 'px';
+                    j++;
+                }
+                k++;
+            }
+
+            // Copy any remaining elements
+            while (i < left.length) {
+                bars[k].style.height = left[i] + 'px';
+                i++;
+                k++;
+            }
+
+            while (j < right.length) {
+                bars[k].style.height = right[j] + 'px';
+                j++;
+                k++;
+            }
+
+            // Visualize the merged section
+            for (let i = start; i <= end; i++) {
+                bars[i].classList.add('merged'); // Merged section highlighted
+            }
+            await new Promise(resolve => setTimeout(resolve, currentSpeed));
+
+            // Remove active class after merging
+            for (let i = start; i <= end; i++) {
+                bars[i].classList.remove('active');
+            }
+        }
+
+        // Event listener for Start Sorting
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!isSorting) {
+                currentSpeed = parseInt(document.getElementById('speed').value);
+                bars.length = 0;
+                generateBars();
+                mergeSort(0, bars.length - 1);
+            }
+        });
+
+        // Event listener for Stop Sorting
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            isSorting = false;
+            alert('Sorting stopped!');
+        });
+
+        window.onload = generateBars;
+    </script>
+    <br>
+    <div style="margin-top: auto; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+
+    
+</body>
+</html>

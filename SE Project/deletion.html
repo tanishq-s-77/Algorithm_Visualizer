@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Value from Array</title>
+</head>
+<body style="background: linear-gradient(to right, #800080, #FF6347);
+background-size: cover;
+background-position: center; padding: 50px 20px;">
+
+    <!-- Welcome Section for Deletion Page -->
+    <div style="text-align: center; background-color:rgb(105, 14, 72); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h1>Delete Value from Array</h1>
+    </div>
+
+    <!-- Array Deletion Section -->
+    <div style="background-color: rgba(0, 0, 0, 0.5); color: white; padding: 20px; border-radius: 10px; margin-top: 30px; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <h2>Random Array</h2>
+        <!-- Display the random array and the deletion option -->
+        <div id="arrayContainer" style="margin-top: 20px;">
+            <h3>Current Array:</h3>
+            <p id="arrayDisplay" style="font-size: 18px; color: #ffffff;">[]</p>
+        </div>
+        
+        <!-- Dropdown to select a value to delete -->
+        <div id="selectValueContainer" style="margin-top: 20px;">
+            <h3>Select a Value to Delete:</h3>
+            <select id="valueSelect" style="padding: 10px; font-size: 16px;">
+                <!-- Options will be added dynamically -->
+            </select>
+        </div>
+
+        <button onclick="deleteFromArray()" style="background-color: #d75210; color: white; padding: 10px 20px; border-radius: 5px; font-size: 18px; margin-top: 20px;">Delete Selected Element</button>
+    </div>
+
+    <!-- Footer Section (Copyright Info) -->
+    <div style="text-align: center; margin-top: 40px; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+
+    <script>
+        // Initialize an array of 10 random values
+        let array = generateRandomArray();
+
+        // Function to generate a random array of exactly 10 elements
+        function generateRandomArray() {
+            let arr = [];
+            const arrayLength = 10; // Array length fixed to 10
+            for (let i = 0; i < arrayLength; i++) {
+                arr.push(Math.floor(Math.random() * 100) + 1); // Random numbers between 1 and 100
+            }
+            return arr;
+        }
+
+        // Function to delete a selected element from the array
+        function deleteFromArray() {
+            let selectedValue = document.getElementById('valueSelect').value;
+            if (selectedValue !== "Select a value") {
+                array = array.filter(item => item !== parseInt(selectedValue));  // Removes the selected value
+                updateArrayDisplay();
+                updateSelectOptions();
+            } else {
+                alert("Please select a value to delete.");
+            }
+        }
+
+        // Function to update the array display
+        function updateArrayDisplay() {
+            document.getElementById('arrayDisplay').textContent = JSON.stringify(array);
+        }
+
+        // Function to update the dropdown options based on current array values
+        function updateSelectOptions() {
+            let selectElement = document.getElementById('valueSelect');
+            selectElement.innerHTML = "";  // Clear existing options
+            let defaultOption = document.createElement("option");
+            defaultOption.text = "Select a value";
+            defaultOption.value = "Select a value";
+            selectElement.appendChild(defaultOption);
+            
+            // Add new options for each value in the array
+            array.forEach(value => {
+                let option = document.createElement("option");
+                option.text = value;
+                option.value = value;
+                selectElement.appendChild(option);
+            });
+        }
+
+        // Display the random array and update dropdown options on page load
+        updateArrayDisplay();
+        updateSelectOptions();
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A* Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        /* Heading Styles */
+        .header {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Container for grid and buttons */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(10, 30px);
+            gap: 1px;
+            background-color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Each cell in the grid */
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 1px solid #ddd;
+        }
+
+        .start {
+            background-color: green;
+        }
+
+        .end {
+            background-color: red;
+        }
+
+        .wall {
+            background-color: black;
+        }
+
+        .open {
+            background-color: rgb(255, 255, 0);
+        }
+
+        .closed {
+            background-color: rgb(116, 169, 255);
+        }
+
+        .path {
+            background-color: rgb(228, 46, 46);
+        }
+
+        /* Button Styles */
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color:black;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color:darkgreen;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(to right, #006400, #FFD700);
+background-size: cover;
+background-position: center;
+;"><br><br>
+
+    <!-- Header Section -->
+    <div style="background-color: darkgreen; color: white; border-radius: 10px; padding: 20px;">
+        <h1>A* Algorithm Visualizer</h1>
+    </div><br><br><br><br>
+
+    <!-- Container for grid and buttons -->
+    <div class="container">
+        <!-- Grid Section -->
+        <div class="grid" id="grid"></div><br><br>
+
+        <!-- Button Section -->
+        <div class="button-container">
+            <button class="button" id="startButton">Start</button>
+            <button class="button" id="clearButton">Clear Grid</button>
+        </div>
+    </div>
+
+    <script>
+        // Grid settings
+        const gridContainer = document.getElementById('grid');
+        const rows = 10;
+        const cols = 10;
+        let grid = [];
+
+        // A* Algorithm variables
+        let startNode = null;
+        let endNode = null;
+        let isProcessing = false;
+        let openSet = [];
+        let closedSet = [];
+        let cameFrom = {};
+        let gScores = {};
+        let fScores = {};
+        
+        // Initialize the grid with divs
+        function createGrid() {
+            for (let i = 0; i < rows; i++) {
+                grid[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.addEventListener('click', () => handleCellClick(i, j, cell));
+                    gridContainer.appendChild(cell);
+                    grid[i].push(cell);
+                }
+            }
+        }
+
+        // Handling clicks on grid cells
+        let startSet = false;
+        let endSet = false;
+        function handleCellClick(row, col, cell) {
+            if (isProcessing) return; // Prevent interaction during algorithm execution
+
+            if (!startSet) {
+                cell.classList.add('start');
+                startSet = true;
+                startNode = { row, col };
+            } else if (!endSet) {
+                cell.classList.add('end');
+                endSet = true;
+                endNode = { row, col };
+            } else {
+                cell.classList.add('wall');
+            }
+        }
+
+        // Heuristic function (Manhattan distance)
+        function heuristic(a, b) {
+            return Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
+        }
+
+        // Reconstruct the path from cameFrom object
+        function reconstructPath() {
+            let current = endNode;
+            while (current !== startNode) {
+                const { row, col } = current;
+                grid[row][col].classList.add('path');
+                current = cameFrom[`${row},${col}`];
+            }
+            grid[startNode.row][startNode.col].classList.add('start');
+            grid[endNode.row][endNode.col].classList.add('end');
+        }
+
+        // A* Algorithm logic
+        function aStarAlgorithm() {
+            openSet = [startNode];
+            closedSet = [];
+            cameFrom = {};
+            gScores = {};
+            fScores = {};
+
+            gScores[`${startNode.row},${startNode.col}`] = 0;
+            fScores[`${startNode.row},${startNode.col}`] = heuristic(startNode, endNode);
+
+            const interval = setInterval(() => {
+                if (openSet.length === 0) {
+                    clearInterval(interval);
+                    alert('No path found!');
+                    return;
+                }
+
+                // Get the node in openSet with the lowest fScore
+                let current = openSet.reduce((prev, curr) => fScores[`${curr.row},${curr.col}`] < fScores[`${prev.row},${prev.col}`] ? curr : prev);
+                
+                // If we reached the end node, reconstruct the path
+                if (current.row === endNode.row && current.col === endNode.col) {
+                    clearInterval(interval);
+                    reconstructPath();
+                    return;
+                }
+
+                // Move current from openSet to closedSet
+                openSet = openSet.filter(node => node !== current);
+                closedSet.push(current);
+                grid[current.row][current.col].classList.add('closed');
+
+                // Check the neighbors
+                const neighbors = [
+                    { row: current.row - 1, col: current.col },
+                    { row: current.row + 1, col: current.col },
+                    { row: current.row, col: current.col - 1 },
+                    { row: current.row, col: current.col + 1 },
+                ];
+
+                for (let neighbor of neighbors) {
+                    if (neighbor.row < 0 || neighbor.col < 0 || neighbor.row >= rows || neighbor.col >= cols) {
+                        continue; // Skip out of bounds
+                    }
+                    const neighborCell = grid[neighbor.row][neighbor.col];
+                    if (neighborCell.classList.contains('wall') || closedSet.some(node => node.row === neighbor.row && node.col === neighbor.col)) {
+                        continue; // Skip walls and already evaluated nodes
+                    }
+
+                    const tentativeGScore = gScores[`${current.row},${current.col}`] + 1;
+
+                    if (!openSet.some(node => node.row === neighbor.row && node.col === neighbor.col)) {
+                        openSet.push(neighbor);
+                    } else if (tentativeGScore >= gScores[`${neighbor.row},${neighbor.col}`]) {
+                        continue;
+                    }
+
+                    cameFrom[`${neighbor.row},${neighbor.col}`] = current;
+                    gScores[`${neighbor.row},${neighbor.col}`] = tentativeGScore;
+                    fScores[`${neighbor.row},${neighbor.col}`] = gScores[`${neighbor.row},${neighbor.col}`] + heuristic(neighbor, endNode);
+
+                    grid[neighbor.row][neighbor.col].classList.add('open');
+                }
+            }, 50);
+        }
+
+        // Button to start the A* algorithm
+        document.getElementById('startButton').addEventListener('click', () => {
+            if (!startSet || !endSet) {
+                alert('Please set both start and end points!');
+                return;
+            }
+            if (isProcessing) return; // Prevent multiple executions at once
+            isProcessing = true;
+            aStarAlgorithm();
+        });
+
+        // Button to clear grid
+        document.getElementById('clearButton').addEventListener('click', () => {
+            gridContainer.innerHTML = '';
+            createGrid();
+            startSet = false;
+            endSet = false;
+            isProcessing = false;
+        });
+
+        // Initialize the grid when the page loads
+        createGrid();
+    </script>
+    <div style="margin-top: auto; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+</body>
+</html>

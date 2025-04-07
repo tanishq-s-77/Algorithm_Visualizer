@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra's Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: white;
+            color: navy;
+            padding: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 1px;
+            margin-top: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .grid-item {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .start {
+            background-color: rgba(94, 255, 0, 0.556);
+        }
+        .end {
+            background-color: rgba(255, 89, 0, 0.784);
+        }
+        .blocked {
+            background-color: black;
+        }
+        .path {
+            background-color: #ffce3d;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .custom-btn {
+            background-color: #000000;
+            color: white;
+            padding: 15px 32px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+        .custom-btn:hover {
+            background-color:darkgreen;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(to right, #006400, #FFD700);
+background-size: cover;
+background-position: center;
+">
+    <div style="background-color: darkgreen; color: white; border-radius: 10px; padding: 20px;">
+    <h1>Dijkstra's Algorithm Visualizer</h1>
+    </div>
+
+    <div class="grid-container" id="grid-container"></div>
+
+    <div class="buttons">
+        <button class="custom-btn" id="clearBtn">Clear Grid</button>
+        <button class="custom-btn" id="startBtn">Start Searching Dijkstra's Path</button>
+    </div>
+
+    <script>
+        const gridContainer = document.getElementById('grid-container');
+        const clearBtn = document.getElementById('clearBtn');
+        const startBtn = document.getElementById('startBtn');
+        const rows = 10;
+        const cols = 10;
+        let grid = [];
+        let startNode = null;
+        let endNode = null;
+
+        // Initialize the grid
+        function generateGrid() {
+            grid = [];
+            for (let r = 0; r < rows; r++) {
+                let row = [];
+                for (let c = 0; c < cols; c++) {
+                    let node = document.createElement('div');
+                    node.classList.add('grid-item');
+                    node.dataset.row = r;
+                    node.dataset.col = c;
+                    gridContainer.appendChild(node);
+
+                    // Add event listeners to allow user to click on grid cells
+                    node.addEventListener('click', handleCellClick);
+
+                    row.push(node);
+                }
+                grid.push(row);
+            }
+        }
+
+        // Handle clicks to set start, end, or block cells
+        function handleCellClick(e) {
+            const cell = e.target;
+            const row = cell.dataset.row;
+            const col = cell.dataset.col;
+
+            if (!startNode) {
+                startNode = { row: parseInt(row), col: parseInt(col) };
+                cell.classList.add('start');
+            } else if (!endNode) {
+                endNode = { row: parseInt(row), col: parseInt(col) };
+                cell.classList.add('end');
+            } else {
+                cell.classList.toggle('blocked');
+            }
+        }
+
+        // Clear the grid and reset the start/end points
+        clearBtn.addEventListener('click', () => {
+            gridContainer.innerHTML = '';
+            startNode = null;
+            endNode = null;
+            generateGrid();
+        });
+
+        // Dijkstra's Algorithm to find the shortest path
+        function dijkstra() {
+            const openSet = [];
+            const closedSet = [];
+            const cameFrom = {};
+
+            const start = { ...startNode, g: 0, f: heuristic(startNode) };
+            openSet.push(start);
+
+            while (openSet.length > 0) {
+                openSet.sort((a, b) => a.f - b.f);
+                const current = openSet.shift();
+                const { row, col } = current;
+
+                if (row === endNode.row && col === endNode.col) {
+                    reconstructPath(cameFrom, current);
+                    return;
+                }
+
+                closedSet.push(current);
+
+                const neighbors = getNeighbors(current);
+
+                for (const neighbor of neighbors) {
+                    if (closedSet.some(node => node.row === neighbor.row && node.col === neighbor.col) || 
+                        document.querySelector(`[data-row='${neighbor.row}'][data-col='${neighbor.col}']`).classList.contains('blocked')) {
+                        continue;
+                    }
+
+                    const tentativeG = current.g + 1;
+
+                    if (!openSet.some(node => node.row === neighbor.row && node.col === neighbor.col)) {
+                        openSet.push({ ...neighbor, g: tentativeG, f: tentativeG + heuristic(neighbor) });
+                        cameFrom[`${neighbor.row},${neighbor.col}`] = current;
+                    }
+                }
+            }
+        }
+
+        // Get neighboring nodes
+        function getNeighbors(node) {
+            const neighbors = [];
+            const { row, col } = node;
+
+            if (row > 0) neighbors.push({ row: row - 1, col });
+            if (row < rows - 1) neighbors.push({ row: row + 1, col });
+            if (col > 0) neighbors.push({ row, col: col - 1 });
+            if (col < cols - 1) neighbors.push({ row, col: col + 1 });
+
+            return neighbors;
+        }
+
+        // Heuristic function for A* (used in Dijkstra too)
+        function heuristic(node) {
+            return Math.abs(node.row - endNode.row) + Math.abs(node.col - endNode.col);
+        }
+
+        // Reconstruct the path
+        function reconstructPath(cameFrom, current) {
+            const path = [];
+            let pathNode = current;
+
+            while (pathNode) {
+                const cell = document.querySelector(`[data-row='${pathNode.row}'][data-col='${pathNode.col}']`);
+                cell.classList.add('path');
+                path.push(pathNode);
+                pathNode = cameFrom[`${pathNode.row},${pathNode.col}`];
+            }
+        }
+
+        // Start the Dijkstra algorithm
+        startBtn.addEventListener('click', () => {
+            if (startNode && endNode) {
+                dijkstra();
+            } else {
+                alert('Please set both the start and end points.');
+            }
+        });
+
+        // Initialize the grid on page load
+        window.onload = generateGrid;
+
+    </script>
+    <div style="margin-top: auto; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Value in Array</title>
+</head>
+<body style="background: linear-gradient(to right, #800080, #FF6347);
+background-size: cover;
+background-position: center; padding: 50px 20px;">
+
+    <!-- Welcome Section for Searching Page -->
+    <div style="text-align: center;background-color:rgb(105, 14, 72); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h1>Search Value in Array</h1>
+    </div>
+
+    <!-- Array Search Section -->
+    <div style="background-color: rgba(0, 0, 0, 0.5); color: white; padding: 20px; border-radius: 10px; margin-top: 30px; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <h2>Random Array</h2>
+        <!-- Display the random array -->
+        <div id="arrayContainer" style="margin-top: 20px;">
+            <h3>Current Array:</h3>
+            <p id="arrayDisplay" style="font-size: 18px; color: #ffffff;">[]</p>
+        </div>
+        
+        <!-- Input field to enter a value to search -->
+        <div id="searchValueContainer" style="margin-top: 20px;">
+            <h3>Enter a Value to Search:</h3>
+            <input type="number" id="searchInput" style="padding: 10px; font-size: 16px; width: 100px;" placeholder="Search" />
+        </div>
+
+        <button onclick="searchInArray()" style="background-color: #d75210; color: white; padding: 10px 20px; border-radius: 5px; font-size: 18px; margin-top: 20px;">Search</button>
+        
+        <!-- Result of the search -->
+        <div id="searchResultContainer" style="margin-top: 20px;">
+            <p id="searchResult" style="font-size: 18px; color: #ffffff;"></p>
+        </div>
+    </div>
+
+    <!-- Footer Section (Copyright Info) -->
+    <div style="text-align: center; margin-top: 40px; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+
+    <script>
+        // Initialize an array of 10 random values
+        let array = generateRandomArray();
+
+        // Function to generate a random array of exactly 10 elements
+        function generateRandomArray() {
+            let arr = [];
+            const arrayLength = 10; // Array length fixed to 10
+            for (let i = 0; i < arrayLength; i++) {
+                arr.push(Math.floor(Math.random() * 100) + 1); // Random numbers between 1 and 100
+            }
+            return arr;
+        }
+
+        // Function to search for the input value in the array
+        function searchInArray() {
+            let searchValue = document.getElementById('searchInput').value;
+            if (searchValue === "") {
+                alert("Please enter a value to search.");
+                return;
+            }
+
+            // Check if the value is in the array
+            let resultMessage = "Value not found in the array.";
+            if (array.includes(parseInt(searchValue))) {
+                resultMessage = `Value ${searchValue} found in the array.`;
+            }
+
+            // Display the result message
+            document.getElementById('searchResult').textContent = resultMessage;
+        }
+
+        // Function to update the array display
+        function updateArrayDisplay() {
+            document.getElementById('arrayDisplay').textContent = JSON.stringify(array);
+        }
+
+        // Display the random array when the page loads
+        updateArrayDisplay();
+
+    </script>
+
+</body>
+</html>

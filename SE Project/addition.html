@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Value to Array</title>
+</head>
+<body style="background: linear-gradient(to right, #800080, #FF6347);
+background-size: cover;
+background-position: center; padding: 50px 20px;">
+
+    <!-- Welcome Section for Addition Page -->
+    <div style="text-align: center;background-color:rgb(105, 14, 72); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h1>Add Value to Array</h1>
+    </div>
+
+    <!-- Array Input Section -->
+    <div style="background-color: rgba(0, 0, 0, 0.5); color: white; padding: 20px; border-radius: 10px; margin-top: 30px; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <h2>Enter a Value to Add to the Array</h2>
+        <!-- Input form for adding a value -->
+        <input id="inputValue" type="number" placeholder="Enter a number" style="padding: 10px; width: 200px; border-radius: 5px; border: none; margin-top: 10px;">
+        <button onclick="addToArray()" style="background-color: #d75210; color: white; padding: 10px 20px; border-radius: 5px; font-size: 18px; margin-top: 20px;">Add to Array</button>
+        
+        <!-- Display the current array and the result -->
+        <div id="arrayContainer" style="margin-top: 20px;">
+            <h3>Current Array:</h3>
+            <p id="arrayDisplay" style="font-size: 18px; color: #ffffff;">[]</p>
+        </div>
+    </div>
+
+    <!-- Footer Section (Copyright Info) -->
+    <div style="text-align: center; margin-top: 40px; padding: 20px; font-size: 14px; color: #ffffff;">
+        <p>&copy; 2025 Algorithm Visualizer. All Rights Reserved.</p>
+    </div>
+
+    <script>
+        // Initialize an empty array
+        let array = [];
+
+        // Function to add a value to the array
+        function addToArray() {
+            // Get the input value
+            const value = document.getElementById('inputValue').value;
+            
+            // Check if the input is a valid number
+            if (value && !isNaN(value)) {
+                // Add the value to the array
+                array.push(Number(value));
+                
+                // Update the display with the new array
+                document.getElementById('arrayDisplay').textContent = JSON.stringify(array);
+
+                // Clear the input field
+                document.getElementById('inputValue').value = '';
+            } else {
+                alert('Please enter a valid number!');
+            }
+        }
+    </script>
+
+</body>
+</html>
